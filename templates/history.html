@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Transaction History
+{% endblock %}
+
+{% block main %}
+<div class="container">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Balance</th>
+                <th>Stock Value</th>
+                <th>Grand Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td> {{ balance | inr }} </td>
+                <td> {{ sum | inr }} </td>
+                <td> {{ (balance + sum) | inr }} </td>
+            </tr>
+            <tr>
+                <th>Deposited</th>
+                <th>Withdrawn</th>
+                <th>Net Profit</th>
+            </tr>
+            <tr>
+                <td> {{ deposit | inr }} </td>
+                <td> {{ withdraw | inr }} </td>
+                <td> {{ (balance + sum + withdraw - deposit) | inr }} </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<br>
+<div class="container">
+{% if rows %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Price</th>
+                <th>Shares</th>
+                <th>Total</th>
+                <th>Transaction Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+                <tr>
+                    <td> {{ row.symbol }} </td>
+                    <td> {{ row.price | inr }} </td>
+                    <td> {{ row.shares }} </td>
+                    <td> {{ (row.price * row.shares) | inr }} </td>
+                    <td> {{ row.time }} </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endif %}
+</div>
+{% endblock %}

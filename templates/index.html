@@ -1,0 +1,93 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Portfolio
+{% endblock %}
+
+{% block main %}
+<div class="container">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Balance</th>
+                <th>Stock Value</th>
+                <th>Grand Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td> {{ balance | inr }} </td>
+                <td> {{ sum | inr }} </td>
+                <td> {{ (balance + sum) | inr }} </td>
+            </tr>
+            <tr>
+                <th>Deposited</th>
+                <th>Withdrawn</th>
+                <th>Net Profit</th>
+            </tr>
+            <tr>
+                <td> {{ deposit | inr }} </td>
+                <td> {{ withdraw | inr }} </td>
+                <td> {{ (balance + sum + withdraw - deposit) | inr }} </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<br>
+<div class="container">
+    {% if rows %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Cost Price</th>
+                <th>Market Price</th>
+                <th>Shares</th>
+                <th>Total Value</th>
+                <th>Net Gain</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+                <tr>
+                    <td>
+                        <form action="/search" method="post">
+                            <input class="stocklink" type="submit" name="symbol" value={{ row.symbol }}>
+                        </form>
+                    </td>
+                    <td> {{ row.oldprice | inr }} </td>
+                    <td> {{ row.price | inr }} </td>
+                    <td> {{ row.shares }} </td>
+                    <td> {{ (row.price * row.shares) | inr }} </td>
+                    <td>
+                        {% if row.price == row.oldprice %}
+                            {{ 0 | inr}}
+                        {% else %}
+                            {{ ((row.price - row.oldprice) * row.shares) | inr }}
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <form action="/buy" method="post">
+                        <td></td>
+                        <td>
+                            <input name="symbol" placeholder="Symbol" type="hidden" value={{ row.symbol }}>
+                            <input autocomplete="off" class="form-control mx-auto w-auto" name="shares" placeholder="Shares" type="number">
+                        </td>
+                        <td><button class="btn btn-primary" type="submit">Buy</button></td>
+                    </form>
+                    <form action="/sell" method="post">
+                        <td></td>
+                        <td>
+                            <input name="symbol" placeholder="Symbol" type="hidden" value={{ row.symbol }}>
+                            <input autocomplete="off" class="form-control mx-auto w-auto" name="shares" placeholder="Shares" type="number">
+                        </td>
+                        <td><button class="btn btn-primary" type="submit">Sell</button></td>
+                    </form>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+</div>
+{% endblock %}

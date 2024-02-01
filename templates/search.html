@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Search Stocks
+{% endblock %}
+
+{% block main %}
+    <form action="/search" method="post">
+        <div class="mb-3">
+            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" name="symbol" placeholder="Symbol" type="text">
+        </div>
+        <button class="btn btn-primary" type="submit">Search</button>
+    </form>
+    <div class="container">
+    {% if quote %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Stock</th>
+                    <th>Market Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td> {{ quote.symbol }} </td>
+                    <td> {{ quote.price | inr }} </td>
+                </tr>
+            </tbody>
+        </table>
+        <br>
+        <table class="table table-striped">
+            <tr>
+                <th>Daily Chart</th>
+            </tr>
+            <tr>
+                <td><img src={{ url1 }} width=80%></td>
+            </tr>
+            <tr>
+                <th>Weekly Chart</th>
+            </tr>
+            <tr>
+                <td><img src={{ url2 }} width=80%></td>
+            </tr>
+        </table>
+    {% endif %}
+    </div>
+{% endblock %}

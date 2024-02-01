@@ -1,0 +1,65 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Transaction Review
+{% endblock %}
+
+{% block main %}
+<div class="container">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Transaction</th>
+                <th>Price</th>
+                {% if row.shares != 0 %}
+                <th>Shares</th>
+                {% endif %}
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td> {{ row.symbol }} </td>
+                <td> {{ row.price | inr }} </td>
+                {% if row.shares != 0 %}
+                <td> {{ row.shares }} </td>
+                {% endif %}
+                {% if row.shares != 0 %}
+                <td> {{ (row.price * row.shares) | inr }} </td>
+                {% else %}
+                <td> {{ row.price | inr }} </td>
+                {% endif %}
+            </tr>
+            <tr>
+                <td></td>
+                {% if row.shares != 0 %}
+                <td></td>
+                {% endif %}
+                <th> Total </th>
+                {% if row.shares != 0 %}
+                <td> {{ (row.price * row.shares) | inr }} </td>
+                {% else %}
+                <td> {{ row.price | inr }} </td>
+                {% endif %}
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="container">
+    <br>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Previous Balance</th>
+                <th>Current Balance</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td> {{ balance | inr }} </td>
+                <td> {{ currbalance | inr }} </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}
