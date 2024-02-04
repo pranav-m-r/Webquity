@@ -17,6 +17,8 @@ def apology(message, code=400):
     """Render message as an apology to user"""
 
     flash(message.title() + " (Error Code: " + str(code) + ")")
+    if session.get("username") is None:
+        session["username"] = ""
     return render_template(request.path + ".html", username=session["username"])
 
 
@@ -30,6 +32,7 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if session.get("user_id") is None:
+            session["username"] = ""
             return redirect("/login")
         return f(*args, **kwargs)
 
@@ -111,8 +114,8 @@ def index():
     for row in db.execute("SELECT symbol, SUM(total) AS total, SUM(shares) AS shares FROM history WHERE userid=? GROUP BY symbol", session["user_id"]):
         if row["shares"] != 0:
             param.append(row)
-            sum += row["total"]
             param[len(param) - 1]["price"] = lookup(row["symbol"])["price"]
+            sum += param[len(param) - 1]["price"] * row["shares"]
             param[len(param) - 1]["oldprice"] = row["total"]/row["shares"]
 
     # Get user specific data
@@ -425,7 +428,7 @@ def withdraw():
         balance = session["balance"]
         session["balance"] -= cash
         session["withdraw"] += cash
-        
+
         flash("Cash Withdrawn Successfully")
         return render_template("transaction.html", row=row, balance=balance, currbalance=session["balance"], username=session["username"])
 
