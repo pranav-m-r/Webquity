@@ -424,7 +424,7 @@ def withdraw():
         # Update the database
         db.execute("UPDATE users SET cash=?, withdraw=? WHERE id=?", session["balance"] - cash,
                    session["withdraw"] + cash, session["user_id"])
-        row = {"symbol": "Cash Deposited", "price": cash, "shares": 0}
+        row = {"symbol": "Cash Withdrawn", "price": cash, "shares": 0}
         balance = session["balance"]
         session["balance"] -= cash
         session["withdraw"] += cash
