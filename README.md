@@ -1,6 +1,7 @@
 # Webquity
 
-### Video Demo:  [YouTube](https://youtu.be/_c462mDdCjw)
+### Web App: [Webquity](https://webquity.azurewebsites.net/)
+### Video Demo: [YouTube](https://youtu.be/_c462mDdCjw)
 
 ### Description:
 
