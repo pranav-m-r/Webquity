@@ -282,9 +282,8 @@ def search():
 
             # Get charts from stockcharts.com for the symbol
             if quote:
-                url1 = "https://stockcharts.com/c-sc/sc?s=" + quote["symbol"] + "&p=D&b=3&g=0&i=0"
-                url2 = "https://stockcharts.com/c-sc/sc?s=" + quote["symbol"] + "&p=W&b=3&g=0&i=0"
-                return render_template("search.html", quote=quote, username=session["username"], url1=url1, url2=url2)
+                url = "https://stockcharts.com/c-sc/sc?i=0&s=" + quote["symbol"]
+                return render_template("search.html", quote=quote, username=session["username"], url=url)
             else:
                 return apology("invalid symbol", 400)
         else:
