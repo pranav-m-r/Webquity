@@ -42,8 +42,8 @@ This page gives the user a summary and confirmation of any transaction (buying o
 
 ![Webquity-Transaction-Review](https://github.com/pranav-m-r/Webquity/assets/148135964/dc9718fa-cab7-4f83-bccc-20aa3871e2b7)
 
-#### 8. Change Password:
-This route allows the user to change their account's login password, subject to the same restrictions as when the account was created.
+#### 8. Profile:
+This route allows the user to change their account's login password, subject to the same restrictions as when the account was created. The user can also delete their account.
 
 ![Webquity-Password](https://github.com/pranav-m-r/Webquity/assets/148135964/33abc6ac-983b-4a30-8a54-b5c524c26295)
 
@@ -53,7 +53,7 @@ This route allows the user to change their account's login password, subject to 
 I want to thank CS50 for the wonderful learning experience it has provided me. I would specially thank Prof. David Malan whose energy and way of teaching ensures that we are listening in with all our attention and never getting bored. This project is built on the base provided by my favourite CS50 problem set, Finance, so credits to the team for that. Thanks to edX for helping me register for these classes all the way from India and for giving me a hassle-free learning experience.
 #### 2. [Yahoo Finance](https://finance.yahoo.com/):
 I would like to thank Yahoo for their Finance API which proved to be very useful acting as the base to the application's real-time stock data.
-#### 3. [StockCharts](https://stockcharts.com/):
-I would also like to thank StockCharts for their wonderful, well, stock charts (XD). They added a crucial feature to the app and also helped enhance its user interface.
+#### 3. [BigCharts](https://bigcharts.marketwatch.com/):
+I would also like to thank BigCharts by MarketWatch for their wonderful stock charts. They added a crucial feature to the app and also helped enhance its user interface.
 #### 4. [Flaticon](https://www.flaticon.com/):
 Finally, a thanks to Flaticon for the website's favicon, which I found interesting since it conveys all the importance aspects of stock trading without seeming too generic.

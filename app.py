@@ -304,10 +304,10 @@ def search():
         if str(request.form.get("symbol")).isalnum():
             quote = lookup(request.form.get("symbol"))
 
-            # Get charts from stockcharts.com for the symbol
+            # Get charts for the symbol
             if quote:
-                url1 = "https://stockcharts.com/c-sc/sc?s=" + quote["symbol"] + "&p=D&b=3&g=0&i=0&r=1707142691477"
-                url2 = "https://stockcharts.com/c-sc/sc?s=" + quote["symbol"] + "&p=W&b=3&g=0&i=0&r=1707142691477"
+                url1 = "https://api.wsj.net/api/kaavio/charts/big.chart?nosettings=1&symb=" + quote["symbol"] + "&uf=0&type=2&size=2&style=320&freq=1&time=7&compidx=&ma=0&maval=9&lf=1&lf2=0&lf3=0&height=335&width=579&mocktick=1"
+                url2 = "https://api.wsj.net/api/kaavio/charts/big.chart?nosettings=1&symb=" + quote["symbol"] + "&uf=0&type=2&size=2&style=320&freq=2&time=12&compidx=&ma=0&maval=9&lf=1&lf2=0&lf3=0&height=335&width=579&mocktick=1"
                 return render_template("search.html", quote=quote, username=session["username"], url1=url1, url2=url2)
             else:
                 return apology("invalid symbol", 400)
