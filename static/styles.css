@@ -28,3 +28,9 @@ nav .navbar-brand .green
     color: #158ce6;
     background-color: #ffffff00;
 }
+
+a
+{
+    color: #158ce6;
+    text-decoration: none;
+}

@@ -1,16 +1,25 @@
 from cs50 import SQL
 from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
-from forex_python.converter import CurrencyRates
 from functools import wraps
 from werkzeug.security import check_password_hash, generate_password_hash
 
-import csv
 import datetime
 import pytz
 import requests
 import urllib
-import uuid
+import os
+from dotenv import load_dotenv
+
+
+request_session = requests.Session()
+request_session.headers.update({
+    "Accept": "*/*",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+})
+
+load_dotenv()
+api_key = os.getenv("API_KEY")
 
 
 def apology(message, code=400):
@@ -49,7 +58,7 @@ def lookup(symbol):
 
     # Yahoo Finance API
     url = (
-        f"https://query1.finance.yahoo.com/v7/finance/download/{urllib.parse.quote_plus(symbol)}"
+        f"https://query2.finance.yahoo.com/v8/finance/chart/{urllib.parse.quote_plus(symbol)}"
         f"?period1={int(start.timestamp())}"
         f"&period2={int(end.timestamp())}"
         f"&interval=1d&events=history&includeAdjustedClose=true"
@@ -57,17 +66,15 @@ def lookup(symbol):
 
     # Query API
     try:
-        response = requests.get(
-            url,
-            cookies={"session": str(uuid.uuid4())},
-            headers={"Accept": "*/*", "User-Agent": "python-requests"},
-        )
+        response = request_session.get(url)
         response.raise_for_status()
 
-        # CSV header: Date,Open,High,Low,Close,Adj Close,Volume
-        quotes = list(csv.DictReader(response.content.decode("utf-8").splitlines()))
+        data = response.json()
+        result = data["chart"]["result"][0]["meta"]["regularMarketPrice"]
 
-        price = CurrencyRates().convert("USD", "INR", round(float(quotes[-1]["Adj Close"]), 2))
+        exchange_rate = request_session.get(
+            f"https://v6.exchangerate-api.com/v6/{api_key}/pair/USD/INR").json()["conversion_rate"]
+        price = exchange_rate * result
         return {"price": price, "symbol": symbol}
     except (KeyError, IndexError, requests.RequestException, ValueError):
         return None
@@ -107,22 +114,39 @@ def after_request(response):
 def index():
     """Show portfolio of stocks"""
 
-    sum = 0
-    param = []
+    # Fetch all required data in a single query
+    rows = db.execute("""
+        SELECT symbol, SUM(total) AS total, SUM(shares) AS shares
+        FROM history
+        WHERE userid=?
+        GROUP BY symbol
+    """, session["user_id"])
 
-    # Create list of dictionaries required for the table
-    for row in db.execute("SELECT symbol, SUM(total) AS total, SUM(shares) AS shares FROM history WHERE userid=? GROUP BY symbol", session["user_id"]):
-        if row["shares"] != 0:
-            param.append(row)
-            param[len(param) - 1]["price"] = lookup(row["symbol"])["price"]
-            sum += param[len(param) - 1]["price"] * row["shares"]
-            param[len(param) - 1]["oldprice"] = row["total"]/row["shares"]
-
-    # Get user specific data
+    # Fetch user data
     usrdata = db.execute("SELECT cash, deposit, withdraw FROM users WHERE id = ?", session["user_id"])[0]
+
+    # Initialize variables
+    param = []
+    sum = 0
     session["balance"] = float(usrdata["cash"])
     session["deposit"] = float(usrdata["deposit"])
     session["withdraw"] = float(usrdata["withdraw"])
+
+    symbols = [row["symbol"] for row in rows if row["shares"] != 0]
+    prices = {symbol: lookup(symbol)["price"] for symbol in symbols}
+
+    for row in rows:
+        if row["shares"] != 0:
+            price = prices[row["symbol"]]
+            param.append({
+                "symbol": row["symbol"],
+                "shares": row["shares"],
+                "price": price,
+                "oldprice": row["total"] / row["shares"],
+                "total": price * row["shares"]
+            })
+            sum += price * row["shares"]
+
     session["sum"] = sum
 
     return render_template("index.html", rows=param, balance=session["balance"], username=session["username"],
@@ -436,51 +460,57 @@ def withdraw():
         return render_template("withdraw.html", username=session["username"])
 
 
-@app.route("/password", methods=["GET", "POST"])
-def password():
-    """Change user's password"""
+@app.route("/profile", methods=["GET", "POST"])
+@login_required
+def profile():
+    """User profile with options to change password or delete account"""
 
-    # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
-        rows = db.execute(
-            "SELECT * FROM users WHERE username = ?", request.form.get("username")
-        )
+        # Get the action (change password or delete account)
+        action = request.form.get("action")
+        current_password = request.form.get("current_password")
 
-        # Ensure password was submitted
-        if not str(request.form.get("password")).isascii():
-            return apology("invalid password", 400)
+        # Query database for the current user
+        rows = db.execute("SELECT * FROM users WHERE id = ?", session["user_id"])
 
-        # Ensure password was confirmed
-        elif not str(request.form.get("confirmation")).isascii():
-            return apology("invalid password", 400)
+        # Ensure the current password is correct
+        if len(rows) != 1 or not check_password_hash(rows[0]["hash"], current_password):
+            return apology("invalid current password", 400)
 
-        # Ensure password and confirmation are the same
-        elif request.form.get("password") != request.form.get("confirmation"):
-            return apology("password and confirmation do not match", 400)
+        if action == "change_password":
+            # Ensure new password and confirmation are provided
+            new_password = request.form.get("new_password")
+            confirmation = request.form.get("confirmation")
 
-        # Check for password specifications
-        flag1 = False
-        flag2 = False
-        flag3 = False
-        for i in str(request.form.get("password")):
-            if i.isalpha():
-                flag1 = True
-            elif i.isdigit():
-                flag2 = True
-            else:
-                flag3 = True
-        if not (flag1 and flag2 and flag3):
-            return apology("password must contain atleast one alphabet, number and special character", 400)
-        elif len(str(request.form.get("password"))) < 8 or len(str(request.form.get("password"))) > 16:
-            return apology("password must contain 8-16 characters", 400)
+            if not new_password or not confirmation:
+                return apology("missing new password or confirmation", 400)
 
-        # Change password in the database
-        db.execute("UPDATE users SET hash=? WHERE id=?", generate_password_hash(request.form.get("password")), session["user_id"])
-        flash("Changed Password Successfully")
+            # Ensure new password and confirmation match
+            if new_password != confirmation:
+                return apology("new password and confirmation do not match", 400)
 
-        # Redirect user to home page
-        return redirect("/")
+            # Check for password specifications
+            flag1 = any(c.isalpha() for c in new_password)
+            flag2 = any(c.isdigit() for c in new_password)
+            flag3 = any(not c.isalnum() for c in new_password)
 
-    # User reached route via GET (as by clicking a link or via redirect)
-    else:
-        return render_template("password.html", username=session["username"])
+            if not (flag1 and flag2 and flag3):
+                return apology("password must contain at least one alphabet, number, and special character", 400)
+            elif len(new_password) < 8 or len(new_password) > 16:
+                return apology("password must contain 8-16 characters", 400)
+
+            # Update the password in the database
+            db.execute("UPDATE users SET hash = ? WHERE id = ?", generate_password_hash(new_password), session["user_id"])
+            flash("Password Changed Successfully")
+            return redirect("/profile")
+
+        elif action == "delete_account":
+            # Delete the user account from the database
+            db.execute("DELETE FROM users WHERE id = ?", session["user_id"])
+            db.execute("DELETE FROM history WHERE userid = ?", session["user_id"])
+            session.clear()
+            flash("Account Deleted Successfully")
+            return redirect("/register")
+
+    # Render the profile page
+    return render_template("profile.html", username=session["username"])
