@@ -1,7 +1,8 @@
 # Webquity
 
-### Web App: [Webquity](https://webquity.azurewebsites.net/)
-### Video Demo: [YouTube](https://youtu.be/_c462mDdCjw)
+### Web App: [Webquity](https://webquity.azurewebsites.net/) [Not Maintained]
+
+#### Note: The database has been moved to Cloud Firestore and the app no longer uses SQLite.
 
 ### Description:
 
@@ -49,7 +50,7 @@ This route allows the user to change their account's login password, subject to 
 
 ### Credits:
 
-#### 1. [CS50](https://cs50.harvard.edu/x/2024/) & [EdX](https://www.edx.org/):
+#### 1. [CS50](https://cs50.harvard.edu/x/2024/) & [edX](https://www.edx.org/):
 I want to thank CS50 for the wonderful learning experience it has provided me. I would specially thank Prof. David Malan whose energy and way of teaching ensures that we are listening in with all our attention and never getting bored. This project is built on the base provided by my favourite CS50 problem set, Finance, so credits to the team for that. Thanks to edX for helping me register for these classes all the way from India and for giving me a hassle-free learning experience.
 #### 2. [Yahoo Finance](https://finance.yahoo.com/):
 I would like to thank Yahoo for their Finance API which proved to be very useful acting as the base to the application's real-time stock data.
